@@ -5,6 +5,7 @@ import com.geekster.Doctors_App.dto.SignInInput;
 import com.geekster.Doctors_App.dto.SignInOutput;
 import com.geekster.Doctors_App.dto.SignUpInput;
 import com.geekster.Doctors_App.dto.SignUpOutput;
+import com.geekster.Doctors_App.model.AppointmentKey;
 import com.geekster.Doctors_App.model.AuthenticationToken;
 import com.geekster.Doctors_App.model.Doctor;
 import com.geekster.Doctors_App.model.Patient;
@@ -28,12 +29,13 @@ public class PatientService {
     @Autowired
     DoctorService ds;
 
+    @Autowired
+    AppointmentService appoints;
+
     public SignUpOutput signup(SignUpInput signupdto) {
 
         //check if user exist or not
-
         Patient patient=pr.findFirstByPatientEmail(signupdto.getUserEmail());
-
         if(patient!=null){
             throw new IllegalStateException("Patient already exist..!! sign in instead..");
         }
@@ -44,18 +46,14 @@ public class PatientService {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-
         //save the user
         patient=new Patient(signupdto.getUserFirstName(),signupdto.getUserLastName(),
                             signupdto.getUserEmail(),encryptedPassword,
                             signupdto.getUserContact());
-
         pr.save(patient);
-
         //generate the token
         AuthenticationToken token=new AuthenticationToken(patient);
         as.savetoken(token);
-
         return new SignUpOutput("patient registered","Patient created successfully");
     }
 
@@ -63,7 +61,6 @@ public class PatientService {
         MessageDigest md5= MessageDigest.getInstance("MD5");
         md5.update(userPassword.getBytes());
         byte[] digested=md5.digest();
-
         String hash= DatatypeConverter.printHexBinary(digested);
         return hash;
     }
@@ -74,7 +71,6 @@ public class PatientService {
         if(patient==null){
             throw new IllegalStateException("User Invalid..!! sign up instead..");
         }
-
         //encrypt the password
         String encryptedPassword=null;
         try {
@@ -83,22 +79,22 @@ public class PatientService {
             e.printStackTrace();
         }
         //match with database password
-
        boolean isvalid=encryptedPassword.equals(patient.getPatientPassword());
-
         if(!isvalid){
             //dont want to help hacker which is incorrect
             throw new IllegalStateException("User Invalid..!! sign up instead..");
         }
         //figure out token
-
         AuthenticationToken authtoken=as.gettoken(patient);
         //set output response
-
         return new SignInOutput("Authentication successful",authtoken.getToken());
     }
 
     public List<Doctor> getalldoc() {
        return ds.getalldoc();
+    }
+
+    public void deleteappointment(AppointmentKey key) {
+        appoints.deleteappointment(key);
     }
 }

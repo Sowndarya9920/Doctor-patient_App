@@ -23,7 +23,7 @@ public class  Patient {
     private String patientPassword;
     private String patientContact;
 
-    @OneToOne
+    @OneToOne (mappedBy = "patient")
     private Appointment appointment;
 
     public Patient(String patientFirstName, String patientLastName, String patientEmail, String patientPassword, String patientContact) {

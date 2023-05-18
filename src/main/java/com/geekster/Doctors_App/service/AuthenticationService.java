@@ -19,4 +19,10 @@ public class AuthenticationService {
 
        return ar.findByPatient(patient);
     }
+
+    public boolean authenticate(String userEmail, String token) {
+       AuthenticationToken authtoken= ar.findFirstByToken(token);
+       String expectedemail=authtoken.getPatient().getPatientEmail();
+       return expectedemail.equals(userEmail);
+    }
 }

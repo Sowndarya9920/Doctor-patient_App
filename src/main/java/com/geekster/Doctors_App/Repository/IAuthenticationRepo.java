@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IAuthenticationRepo extends CrudRepository<AuthenticationToken,Long> {
     AuthenticationToken findByPatient(Patient patient);
+
+    AuthenticationToken findFirstByToken(String token);
 }
